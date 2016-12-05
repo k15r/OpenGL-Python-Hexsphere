@@ -108,7 +108,7 @@ def split_triangle(face, edges, points):
         c = [face[2], l + 1, l + 2, face[0]]
         edges[(face[2], face[0])] = c
 
-    points.append(_v.slerp(points[a[2]], points[b[2]], (1. / 2.)))
+    points.append(_v.slerp(points[a[1]], points[b[2]], (1. / 2.)))
     faces = [
         [
             face[0],
@@ -165,23 +165,21 @@ def rgb(x, y, z):
 sizes = []
 verticies, normals, colors = [], [], []
 
-edges = {}
 
-new_faces = []
-for face in faces:
-    (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
-    new_faces = new_faces + additional_faces
-print len(new_faces)
-for face in new_faces:
-    (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
-    new_faces = new_faces + additional_faces
-print len(new_faces)
-for face in new_faces:
-    (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
-    new_faces = new_faces + additional_faces
-print len(new_faces)
+def split_all_faces(faces, initial_points):
+    edges = {}
+    new_faces = []
+    for face in faces:
+        (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
+        new_faces = new_faces + additional_faces
 
-faces = new_faces
+    return (new_faces, initial_points)
+
+(faces, initial_points) = split_all_faces(faces,initial_points)
+(faces, initial_points) = split_all_faces(faces,initial_points)
+(faces, initial_points) = split_all_faces(faces,initial_points)
+(faces, initial_points) = split_all_faces(faces,initial_points)
+print len(faces)
 
 for indexes in faces:
     sizes.append(len(indexes))

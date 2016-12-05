@@ -23,6 +23,7 @@ from OpenGL.GL import *
 
 from linalg import matrix as m
 from linalg import quaternion as q
+from linalg import vector as v
 
 import hexsphere
 
@@ -84,6 +85,7 @@ def draw_object():
 	glPushMatrix()
 	glScale(scale, scale, scale)
 	glMultMatrixf(m.column_major(q.matrix(rotation)))
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 	
 	offset = 0
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
