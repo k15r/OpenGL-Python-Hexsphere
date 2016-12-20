@@ -86,6 +86,7 @@ def draw_object():
 	glMultMatrixf(m.column_major(q.matrix(rotation)))
 	
 	offset = 0
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	for size in sizes:
 		glBegin(GL_TRIANGLE_STRIP)
 		for i in range(offset, offset+size):

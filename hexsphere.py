@@ -75,79 +75,84 @@ faces = [
 
 
 def split_triangle(face, edges, points):
-    if not edges.get((face[0], face[1])):
+    a = edges.get((face[0], face[1]))
+    if not a:
         l = len(points) - 1
         new_points = [
             _v.slerp(points[face[0]], points[face[1]], (1. / 3.)),
             _v.slerp(points[face[0]], points[face[1]], (2. / 3.)),
         ]
-        print [points[face[0]], points[face[1]]]
-        print new_points
         points = points + new_points
-        edges[(face[0], face[1])] = [face[0], l + 1, l + 2, face[1]]
-    if not edges.get((face[1], face[2])):
+        a = [face[0], l + 1, l + 2, face[1]]
+        edges[(face[0], face[1])] = a
+
+    b = edges.get((face[1], face[2]))
+    if not b:
         l = len(points) - 1
         new_points = [
             _v.slerp(points[face[1]], points[face[2]], (1. / 3.)),
             _v.slerp(points[face[1]], points[face[2]], (2. / 3.)),
         ]
         points = points + new_points
-        edges[(face[1], face[2])] = [face[1], l + 1, l + 2, face[2]]
-    if not edges.get((face[2], face[0])):
+        b = [face[1], l + 1, l + 2, face[2]]
+        edges[(face[1], face[2])] = b
+
+    c = edges.get((face[2], face[0]))
+    if not c:
         l = len(points) - 1
         new_points = [
             _v.slerp(points[face[2]], points[face[0]], (1. / 3.)),
             _v.slerp(points[face[2]], points[face[0]], (2. / 3.)),
         ]
         points = points + new_points
-        edges[(face[2], face[0])] = [face[2], l + 1, l + 2, face[0]]
+        c = [face[2], l + 1, l + 2, face[0]]
+        edges[(face[2], face[0])] = c
 
-    print edges
-    points.append(_v.slerp(points[edges[(face[0], face[1])][2]], points[edges[(face[1], face[2])][2]], (1. / 2.)))
+    points.append(_v.slerp(points[a[2]], points[b[2]], (1. / 2.)))
     faces = [
         [
             face[0],
-            edges[(face[0], face[1])][1],
-            edges[(face[2], face[0])][2],
+            a[1],
+            c[2],
         ],
         [
-            edges[(face[2], face[0])][2],
-            edges[(face[0], face[1])][1],
+            c[2],
+            a[1],
             len(points)-1,
         ],
         [
-            edges[(face[0], face[1])][1],
-            edges[(face[0], face[1])][2],
+            a[1],
+            a[2],
             len(points)-1,
         ],
         [
             face[1],
-            edges[(face[1], face[2])][1],
-            edges[(face[0], face[1])][2],
+            b[1],
+            a[2],
         ],
         [
-            edges[(face[0], face[1])][2],
-            edges[(face[1], face[2])][1],
+            a[2],
+            b[1],
             len(points)-1,
         ],
         [
-            edges[(face[1], face[2])][1],
-            edges[(face[1], face[2])][2],
+            b[1],
+            b[2],
             len(points)-1,
         ],
         [
             face[2],
-            edges[(face[2], face[0])][1],
-            edges[(face[1], face[2])][2],
+            c[1],
+            b[2],
         ],
         [
-            edges[(face[1], face[2])][2],
-            edges[(face[2], face[0])][1],
+            b[2],
+            c[1],
             len(points)-1,
         ],
         [
-            edges[(face[2], face[0])][1],
-            edges[(face[2], face[0])][2],
+            c[1],
+            c[2],
             len(points)-1,
         ],
     ]
@@ -166,10 +171,17 @@ new_faces = []
 for face in faces:
     (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
     new_faces = new_faces + additional_faces
+print len(new_faces)
+for face in new_faces:
+    (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
+    new_faces = new_faces + additional_faces
+print len(new_faces)
+for face in new_faces:
+    (additional_faces, edges, initial_points) = split_triangle(face,edges,initial_points)
+    new_faces = new_faces + additional_faces
+print len(new_faces)
 
 faces = new_faces
-print faces
-print initial_points
 
 for indexes in faces:
     sizes.append(len(indexes))

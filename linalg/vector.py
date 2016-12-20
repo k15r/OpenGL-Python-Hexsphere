@@ -77,20 +77,22 @@ def matrix(v):
 
 
 def slerp(start, end, percent):
-    s = normalize(start)
-    e = normalize(end)
-    dot_start_end = dot(s, e)
+    length= norm(start)
+    start = normalize(start)
+    end = normalize(end)
+    dot_start_end = dot(start, end)
     print dot_start_end
     if dot_start_end < -1.:
         dot_start_end = -1.
     elif dot_start_end > 1.:
         dot_start_end = 1.
-    print percent
     theta = math.acos(dot_start_end) * percent
-    print theta
-    diff = sub(e,s)
-    RelativeVec = mul(dot_start_end, diff)
-    starts=mul(math.cos(theta), s)
+    mul_dot_start= mul(dot_start_end, start)
+    RelativeVec = sub(end,mul_dot_start)
+    RelativeVec = normalize(RelativeVec)
+
+    starts=mul(math.cos(theta), start)
+
     ends=mul(math.sin(theta),RelativeVec)
     sums = add(starts,ends)
-    return mul(norm(start),sums)
+    return mul(length,sums)
