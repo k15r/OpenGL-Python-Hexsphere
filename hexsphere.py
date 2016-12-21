@@ -13,6 +13,8 @@ import math
 
 import sys
 
+import time
+
 from linalg import vector as _v
 
 
@@ -21,6 +23,15 @@ from linalg import vector as _v
 def deg2rad(deg):
     return deg * math.pi / 180.;
 
+
+def timing(f):
+    def wrap(*args):
+        time1 = time.time()
+        ret = f(*args)
+        time2 = time.time()
+        print '%s function took %0.3f ms' % (f.func_name, (time2-time1)*1000.0)
+        return ret
+    return wrap
 
 def make_point(a, z):
     if z < 90:
@@ -75,38 +86,52 @@ faces = [
 
 
 def split_triangle(face, edges, points):
-    a = edges.get((face[0], face[1]))
-    if not a:
-        l = len(points) - 1
-        new_points = [
-            _v.slerp(points[face[0]], points[face[1]], (1. / 3.)),
-            _v.slerp(points[face[0]], points[face[1]], (2. / 3.)),
-        ]
-        points = points + new_points
-        a = [face[0], l + 1, l + 2, face[1]]
-        edges[(face[0], face[1])] = a
+    zero_ind = face[0]
+    one_ind = face[1]
+    two_ind = face[2]
 
-    b = edges.get((face[1], face[2]))
-    if not b:
+    zero_point = points[zero_ind]
+    one_point = points[one_ind]
+    two_point = points[two_ind]
+    a = edges.get((zero_ind, one_ind))
+    a_inv = edges.get((one_ind, zero_ind))
+    if not a and not a_inv:
         l = len(points) - 1
         new_points = [
-            _v.slerp(points[face[1]], points[face[2]], (1. / 3.)),
-            _v.slerp(points[face[1]], points[face[2]], (2. / 3.)),
+            _v.slerp(zero_point, one_point, (1. / 3.)),
+            _v.slerp(zero_point, one_point, (2. / 3.)),
         ]
         points = points + new_points
-        b = [face[1], l + 1, l + 2, face[2]]
-        edges[(face[1], face[2])] = b
+        a = [zero_ind, l + 1, l + 2, one_ind]
+        edges[(zero_ind, one_ind)] = a
+        edges[(one_ind, zero_ind)] = a[::-1]
 
-    c = edges.get((face[2], face[0]))
-    if not c:
+
+    b = edges.get((one_ind, two_ind))
+    b_inv = edges.get((two_ind, one_ind))
+    if not b and not b_inv:
         l = len(points) - 1
         new_points = [
-            _v.slerp(points[face[2]], points[face[0]], (1. / 3.)),
-            _v.slerp(points[face[2]], points[face[0]], (2. / 3.)),
+            _v.slerp(one_point, two_point, (1. / 3.)),
+            _v.slerp(one_point, two_point, (2. / 3.)),
         ]
         points = points + new_points
-        c = [face[2], l + 1, l + 2, face[0]]
-        edges[(face[2], face[0])] = c
+        b = [one_ind, l + 1, l + 2, two_ind]
+        edges[(one_ind, two_ind)] = b
+        edges[(two_ind, one_ind)] = b[::-1]
+
+    c = edges.get((two_ind, zero_ind))
+    c_inv = edges.get((zero_ind, two_ind))
+    if not c and not c_inv:
+        l = len(points) - 1
+        new_points = [
+            _v.slerp(two_point, zero_point, (1. / 3.)),
+            _v.slerp(two_point, zero_point, (2. / 3.)),
+        ]
+        points = points + new_points
+        c = [two_ind, l + 1, l + 2, zero_ind]
+        edges[(two_ind, zero_ind)] = c
+        edges[(zero_ind, two_ind)] = c[::-1]
 
     points.append(_v.slerp(points[a[1]], points[b[2]], (1. / 2.)))
     faces = [
@@ -156,7 +181,15 @@ def split_triangle(face, edges, points):
             len(points)-1,
         ],
     ]
-    return (faces, edges, points)
+    depth = depth - 1
+    if depth:
+        for face in faces:
+            pers_edges = {
+                (face[0],face[1]): edges.get((face[0],face[1])),
+                (face[1],face[2]): edges.get((face[1],face[2])),
+                (face[2],face[0]): edges.get((face[2],face[0])),
+            }
+            split_triangle(face, edges,points,depth)
 
 def rgb(x, y, z):
     return x / 2 + .5, y / 2 + .5, z / 2 + .5
@@ -166,6 +199,7 @@ sizes = []
 verticies, normals, colors = [], [], []
 
 
+@timing
 def split_all_faces(faces, initial_points):
     edges = {}
     new_faces = []
@@ -175,10 +209,12 @@ def split_all_faces(faces, initial_points):
 
     return (new_faces, initial_points)
 
+
 (faces, initial_points) = split_all_faces(faces,initial_points)
 (faces, initial_points) = split_all_faces(faces,initial_points)
 (faces, initial_points) = split_all_faces(faces,initial_points)
 (faces, initial_points) = split_all_faces(faces,initial_points)
+#(faces, initial_points) = split_all_faces(faces,initial_points)
 print len(faces)
 
 for indexes in faces:
