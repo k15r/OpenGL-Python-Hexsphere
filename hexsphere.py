@@ -181,15 +181,7 @@ def split_triangle(face, edges, points):
             len(points)-1,
         ],
     ]
-    depth = depth - 1
-    if depth:
-        for face in faces:
-            pers_edges = {
-                (face[0],face[1]): edges.get((face[0],face[1])),
-                (face[1],face[2]): edges.get((face[1],face[2])),
-                (face[2],face[0]): edges.get((face[2],face[0])),
-            }
-            split_triangle(face, edges,points,depth)
+    return (faces, edges, points)
 
 def rgb(x, y, z):
     return x / 2 + .5, y / 2 + .5, z / 2 + .5
